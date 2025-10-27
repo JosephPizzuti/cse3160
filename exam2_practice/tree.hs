@@ -34,4 +34,24 @@ goLeft' (Node l v r, bs) = (l, (Lc v r):bs)
 goRight' :: Zipper a -> Zipper a
 goRight' (Node l v r, bs) = (r, (Rc v l):bs)
 
+goUp' :: Zipper a -> Zipper a
+goUp' (t, (Lc v r):bs) = (Node t v r, bs)
+goUp' (t, (Rc v l):bs) = (Node l v t, bs)
+
+--goUp but use a maybe to account for trying to go up at root
+goUp'' :: Zipper a -> Maybe (Zipper a)
+goUp'' (t, (Lc v r):bs) = Just (Node t v r, bs)
+goUp'' (t, (Rc v l):bs) = Just (Node l v r, bs)
+goUp'' (t, [])          = Nothing
+
+graft :: Tree a -> Zipper a -> Zipper a
+graft t (_, bs) = (t, bs)
+
+prune :: Zipper a -> Zipper a
+prune (_, bs) = (Leaf, bs)
+
+goRoot :: Zipper a -> Zipper a
+goRoot (t, []) = (t, [])
+goRoot zipper  = goRoot (goUp' zipper)
+
 
