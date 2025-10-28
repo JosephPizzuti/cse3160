@@ -37,4 +37,33 @@ shortw t n = aux (words t) n
 
 shortw' t n = [x | x <- words t, length x <= n]
 
+data Expr a b = Add (Expr a b) (Expr a b)
+  | Sub (Expr a b) (Expr a b)
+  | Mul (Expr a b) (Expr a b)
+  | Pow (Expr a b) b
+  | Negate (Expr a b)
+  | Literal a
+  | Variable String deriving (Eq, Show, Read)
 
+type Store a = [(String, a)]
+makeStore :: (Num a) => Store a
+makeStore = []
+
+writeStore :: (Num a) => String -> a -> Store a -> Store a
+writeStore key v store = (key, v):store
+
+readStore :: (Num a) => Store a -> String -> a
+readStore ((key,v):t) k
+  | k == key = v
+  | otherwise = readStore t k
+
+evaluate :: (Num a, Integral b) => Expr a b -> Store a -> a
+evaluate (Sub e1 e2)    s = (evaluate e1 s) - (evaluate e2 s)
+evaluate (Mul e1 e2)    s = (evaluate e1 s) * (evaluate e2 s)
+evaluate (Pow e1 b)     s = (evaluate e1 s) ^ b
+evaluate (Negate e1)    s = negate (evaluate e1 s)
+evaluate (Literal a)    _ = a
+evaluate (Variable str) s = readStore s str
+
+--derive
+--compile
